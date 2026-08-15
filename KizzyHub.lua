@@ -3,21 +3,28 @@ local CoreGui = game:GetService("CoreGui")
 local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 
--- 1. Create a ScreenGui parented directly to CoreGui
+-- 1. Create a ScreenGui optimized for mobile execution containers
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "JumpscareOverlay"
 screenGui.IgnoreGuiInset = true
 
--- Protect the GUI from being deleted or blocked by PC executors/game scripts
-if syn and syn.protect_gui then
-    syn.protect_gui(screenGui)
-elseif protectgui then
-    protectgui(screenGui)
+-- Handle UI protection for mobile executor environments safely
+local success, err = pcall(function()
+    if gethui then
+        screenGui.Parent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(screenGui)
+        screenGui.Parent = CoreGui
+    else
+        screenGui.Parent = CoreGui
+    end
+end)
+
+if not success then
+    screenGui.Parent = CoreGui
 end
 
-screenGui.Parent = CoreGui
-
--- 2. Create an ImageLabel that stretches across the entire screen
+-- 2. Create an ImageLabel that stretches across the entire mobile screen
 local imageLabel = Instance.new("ImageLabel")
 imageLabel.Name = "JumpscareImage"
 imageLabel.Size = UDim2.new(1, 0, 1, 0)
